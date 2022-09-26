@@ -2,26 +2,56 @@ import { Autocomplete, Checkbox, TextField } from "@mui/material";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { SyntheticEvent, useCallback, useState } from "react";
-import { SettingsSuggestOutlined } from "@mui/icons-material";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-type MyAutocompleteOption = {
+export type MyAutocompleteOption = {
   label: string;
   value: string;
 };
 
-type MyAutocompleteProps = {
+export type MyAutocompleteProps = {
   options: MyAutocompleteOption[];
   label: string;
+  onChange: (value: MyAutocompleteOption | Array<MyAutocompleteOption>) => void;
+  value?: MyAutocompleteOption | Array<MyAutocompleteOption>;
 };
 
+function getValidValues(
+  provided: MyAutocompleteOption | Array<MyAutocompleteOption>,
+  options: Array<MyAutocompleteOption>
+): Array<MyAutocompleteOption> {
+  if (Array.isArray(provided)) {
+    if (provided.length < 1) {
+      return [];
+    }
+
+    const providedValues = provided.map((provided) => provided.value);
+    const optionValues = options.map((option) => option.value);
+    const validValues = providedValues.filter((provided) =>
+      optionValues.includes(provided)
+    );
+
+    return validValues.map((value) => ({
+      value,
+      label: options.find((option) => option.value === value)?.label || value,
+    }));
+  }
+
+  const optionValues = options.map((option) => option.value);
+  if (optionValues.includes(provided.value)) {
+    return [provided];
+  }
+
+  return [];
+}
+
 function MyAutocomplete(props: MyAutocompleteProps) {
-  const { options, label } = props;
-  const [selectedItems, setSelectedItems] = useState<MyAutocompleteOption[]>(
-    []
-  );
+  const { options, label, onChange, value } = props;
+  const validValues = getValidValues(value || [], options);
+  const [selectedItems, setSelectedItems] =
+    useState<MyAutocompleteOption[]>(validValues);
   const isAllSelected = selectedItems.length === options.length;
   const handleChange = useCallback(
     (
@@ -34,23 +64,27 @@ function MyAutocomplete(props: MyAutocompleteProps) {
           (selected) => selected.value === "select-all"
         );
         const isSelectAllSelected = selectAll !== undefined;
+        const selectedItems = isSelectAllSelected ? [...options] : value;
 
-        if (isSelectAllSelected) {
-          setSelectedItems([...options]);
-        } else {
-          setSelectedItems(value);
-        }
+        setSelectedItems(selectedItems);
+        onChange(selectedItems);
       } else {
         setSelectedItems([value]);
+        onChange([value]);
       }
     },
     []
   );
 
+  const renderedOptions: MyAutocompleteOption[] = [
+    { value: "select-all", label: "Select All" },
+    ...options,
+  ];
+
   return (
     <Autocomplete
       id="my-autocomplete"
-      options={[{ value: "select-all", label: "Select All" }, ...options]}
+      options={renderedOptions}
       getOptionLabel={(option) => option.label}
       renderOption={(props, option, { selected }) => {
         const selectAllProps =
