@@ -1,7 +1,7 @@
 import { Autocomplete, Checkbox, TextField } from "@mui/material";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import { SyntheticEvent, useCallback, useState } from "react";
+import { SyntheticEvent, useCallback } from "react";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -50,9 +50,7 @@ function getValidValues(
 function MyAutocomplete(props: MyAutocompleteProps) {
   const { options, label, onChange, value } = props;
   const validValues = getValidValues(value || [], options);
-  const [selectedItems, setSelectedItems] =
-    useState<MyAutocompleteOption[]>(validValues);
-  const isAllSelected = selectedItems.length === options.length;
+  const isAllSelected = validValues.length === options.length;
   const handleChange = useCallback(
     (
       event: SyntheticEvent,
@@ -66,10 +64,8 @@ function MyAutocomplete(props: MyAutocompleteProps) {
         const isSelectAllSelected = selectAll !== undefined;
         const selectedItems = isSelectAllSelected ? [...options] : value;
 
-        setSelectedItems(selectedItems);
         onChange(selectedItems);
       } else {
-        setSelectedItems([value]);
         onChange([value]);
       }
     },
@@ -86,6 +82,7 @@ function MyAutocomplete(props: MyAutocompleteProps) {
       id="my-autocomplete"
       options={renderedOptions}
       getOptionLabel={(option) => option.label}
+      isOptionEqualToValue={(option, value) => option.value === value.value}
       renderOption={(props, option, { selected }) => {
         const selectAllProps =
           option.value === "select-all" ? { checked: isAllSelected } : {};
@@ -105,7 +102,7 @@ function MyAutocomplete(props: MyAutocompleteProps) {
       renderInput={(params) => {
         return <TextField {...params} label={label} variant="standard" />;
       }}
-      value={selectedItems}
+      value={validValues}
       onChange={handleChange}
       disableCloseOnSelect
       multiple
