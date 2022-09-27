@@ -5,7 +5,7 @@ import MyAutocomplete, {
 } from "./MyAutocomplete";
 
 interface CustomAutocompleteFieldProps {
-  autoCompleteProps: Omit<MyAutocompleteProps, "onChange" | "value">;
+  autoCompleteProps: Omit<MyAutocompleteProps, "onChange" | "value" | "error">;
   name: string;
 }
 
@@ -26,6 +26,7 @@ function CustomAutocompleteField(props: CustomAutocompleteFieldProps) {
       <MyAutocomplete
         value={field.value}
         onChange={handleChange}
+        error={meta.error}
         {...autoCompleteProps}
       />
     </div>

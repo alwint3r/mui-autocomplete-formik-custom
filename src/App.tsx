@@ -40,6 +40,14 @@ function App() {
             initialValues={{
               jedi_knights: [],
             }}
+            validate={(values) => {
+              const errors: any = {};
+              if (values.jedi_knights.length < 1) {
+                errors.jedi_knights = 'You must choose at least one knight';
+              }
+
+              return errors;
+            }}
             onSubmit={(value, { setSubmitting, resetForm }) => {
               console.log(value);
               resetForm();

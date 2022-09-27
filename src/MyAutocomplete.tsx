@@ -16,6 +16,7 @@ export type MyAutocompleteProps = {
   label: string;
   onChange: (value: MyAutocompleteOption | Array<MyAutocompleteOption>) => void;
   value?: MyAutocompleteOption | Array<MyAutocompleteOption>;
+  error?: string;
 };
 
 function getValidValues(
@@ -48,7 +49,7 @@ function getValidValues(
 }
 
 function MyAutocomplete(props: MyAutocompleteProps) {
-  const { options, label, onChange, value } = props;
+  const { options, label, onChange, value, error } = props;
   const validValues = getValidValues(value || [], options);
   const isAllSelected = validValues.length === options.length;
   const handleChange = useCallback(
@@ -100,7 +101,15 @@ function MyAutocomplete(props: MyAutocompleteProps) {
         );
       }}
       renderInput={(params) => {
-        return <TextField {...params} label={label} variant="standard" />;
+        return (
+          <TextField
+            {...params}
+            error={!!error}
+            helperText={error || ""}
+            label={label}
+            variant="standard"
+          />
+        );
       }}
       value={validValues}
       onChange={handleChange}
